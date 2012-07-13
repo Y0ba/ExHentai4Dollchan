@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name			ExHentai4Dollchan
-// @version			1.0
+// @version			1.1
 // @namespace		https://github.com/Y0ba/ExHentai4Dollchan
 // @author			Y0ba
 // @description		Searches images on ExHentai (addon for Dollchan Extension Tools)
+// @updateURL		https://raw.github.com/Y0ba/ExHentai4Dollchan/master/ExHentai4Dollchan.meta.js
 // @include			*
 // ==/UserScript==
 
 let W = new Uint32Array(80),
-	A, B, C, D, E, temp,
 	H0, H1, H2, H3, H4,
 	K0 = 0x5a827999,
 	K1 = 0x6ed9eba1,
@@ -91,7 +91,7 @@ function sha1Hash(buffer) {
 	if(is_little_endian) {
 		for(let i = len_, x; i--;) {
 			x = blocks[i];
-			blocks[i] = (x >>> 24) | ((x<<8) & 0x00FF0000) | ((x >>> 8) & 0x0000FF00) | (x<<24);
+			blocks[i] = (x >>> 24) | ((x << 8) & 0x00FF0000) | ((x >>> 8) & 0x0000FF00) | (x << 24);
 		}
 	}
 	blocks[len_ - 2] = Math.floor(((len) * 8) / Math.pow(2, 32));
