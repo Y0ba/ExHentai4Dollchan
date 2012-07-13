@@ -80,9 +80,11 @@ function sha1Hash(buffer) {
 	H2 = 0x98badcfe;
 	H3 = 0x10325476;
 	H4 = 0xc3d2e1f0;
-	let len_, len = buffer.byteLength,
+	let len_, len = buffer.length,
 		blocks = new Uint8Array(Math.ceil((len / 4 + 3) / 16) * 16 * 4);
-	blocks.set(new Uint8Array(buffer), 0);
+	for (let i = len - 1; i >= 0; i--) {
+		blocks[i] = buffer.charCodeAt(i);
+	}
 	blocks[len] = 0x80;
 	blocks = new Uint32Array(blocks.buffer);
 	len_ = blocks.length;
@@ -101,14 +103,6 @@ function sha1Hash(buffer) {
 	return toHexStr(H0) + toHexStr(H1) + toHexStr(H2) + toHexStr(H3) + toHexStr(H4);
 }
 
-function s2ab(text) {
-	var arr = new Uint8Array(text.length);
-	for (let a = text.length; a >= 0; a--) {
-		arr[a] = text.charCodeAt(a);
-	}
-	return arr.buffer;
-}
-
 window.addEventListener('message', function(e) {
 	let data = e.data.split(';');
 	if(data[0] !== '_ExHentai') {
@@ -120,7 +114,7 @@ window.addEventListener('message', function(e) {
 		overrideMimeType: 'text/plain; charset=x-user-defined',
 		onload: function(e) {
 			if(e.status === 200) {
-				GM_openInTab('http://exhentai.org/?f_shash=' + sha1Hash(s2ab(e.responseText)) + '&fs_similar=1&fs_exp=1', false, true);
+				GM_openInTab('http://exhentai.org/?f_shash=' + sha1Hash(e.responseText) + '&fs_similar=1&fs_exp=1', false, true);
 			} else {
 				GM_log('Error: ' + e.statusText);
 			}
