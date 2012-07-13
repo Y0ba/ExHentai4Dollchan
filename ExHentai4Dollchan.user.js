@@ -131,3 +131,8 @@ window.addEventListener('message', function(e) {
 let attr = document.body.getAttribute('desu-image-search');
 attr = attr ? attr + ';' : '';
 document.body.setAttribute('desu-image-search', attr + 'ExHentai,');
+
+let style = document.createElement('style');
+style.type = 'text/css';
+style.innerHTML = '.DESU_srcExHentai:before { content: ""; padding: 0 16px 0 0; margin: 0 4px; background: url(data:image/gif;base64,R0lGODlhEAAQAHMAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQICgAAACwAAAAAEAAQAINmBhHi28oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAELjDISau9FWg9efCb9wESSGanaanjmr5cHMKkHJYnxYrdi7u/0aYXnBFbmKSyEgEAOw==) no-repeat center; }';
+document.head.appendChild(style);
