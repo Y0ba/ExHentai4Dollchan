@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name			ExHentai4Dollchan
-// @version			1.1
+// @version			1.2
 // @namespace		https://github.com/Y0ba/ExHentai4Dollchan
 // @author			Y0ba
 // @description		Searches images on ExHentai (addon for Dollchan Extension Tools)
@@ -8,7 +8,7 @@
 // @include			*
 // ==/UserScript==
 
-let W = new Uint32Array(80),
+var W = new Uint32Array(80),
 	H0, H1, H2, H3, H4,
 	K0 = 0x5a827999,
 	K1 = 0x6ed9eba1,
@@ -21,8 +21,8 @@ function rol32(x, n) {
 }
 
 function toHexStr(n) {
-	let s = "", v;
-	for(let i = 7; i >= 0; i--) {
+	var s = "", v;
+	for(var i = 7; i >= 0; i--) {
 		v = (n >>> (i * 4)) & 0xf;
 		s += v.toString(16);
 	}
@@ -30,7 +30,7 @@ function toHexStr(n) {
 }
 
 function sha_transform() {
-	let t, temp, A = H0, B = H1, C = H2, D = H3, E = H4;
+	var t, temp, A = H0, B = H1, C = H2, D = H3, E = H4;
 	for(t = 16; t < 80; t++) {
 		W[t] = rol32(W[t - 3] ^ W[t - 8] ^ W[t - 14] ^ W[t - 16], 1);
 	}
@@ -80,23 +80,23 @@ function sha1Hash(buffer) {
 	H2 = 0x98badcfe;
 	H3 = 0x10325476;
 	H4 = 0xc3d2e1f0;
-	let len_, len = buffer.length,
+	var i, x, len_, len = buffer.length,
 		blocks = new Uint8Array(Math.ceil((len / 4 + 3) / 16) * 16 * 4);
-	for (let i = len - 1; i >= 0; i--) {
+	for(i = len - 1; i >= 0; i--) {
 		blocks[i] = buffer.charCodeAt(i);
 	}
 	blocks[len] = 0x80;
 	blocks = new Uint32Array(blocks.buffer);
 	len_ = blocks.length;
 	if(is_little_endian) {
-		for(let i = len_, x; i--;) {
+		for(i = len_; i--;) {
 			x = blocks[i];
 			blocks[i] = (x >>> 24) | ((x << 8) & 0x00FF0000) | ((x >>> 8) & 0x0000FF00) | (x << 24);
 		}
 	}
 	blocks[len_ - 2] = Math.floor(((len) * 8) / Math.pow(2, 32));
 	blocks[len_ - 1] = ((len) * 8) & 0xffffffff;
-	for(let i = 0; i < len_; i += 16){
+	for(i = 0; i < len_; i += 16){
 		W.set(blocks.subarray(i, i + 16));
 		sha_transform();
 	}
@@ -104,15 +104,15 @@ function sha1Hash(buffer) {
 }
 
 window.addEventListener('message', function(e) {
-	let data = e.data.split(';');
+	var data = e.data.split(';');
 	if(data[0] !== '_ExHentai') {
 		return;
 	}
 	GM_xmlhttpRequest({
-		method: "GET",
-		url: data[1],
-		overrideMimeType: 'text/plain; charset=x-user-defined',
-		onload: function(e) {
+		'method': "GET",
+		'url': data[1],
+		'overrideMimeType': 'text/plain; charset=x-user-defined',
+		'onload': function(e) {
 			if(e.status === 200) {
 				GM_openInTab('http://exhentai.org/?f_shash=' + sha1Hash(e.responseText) + '&fs_similar=1&fs_exp=1', false, true);
 			} else {
@@ -122,11 +122,53 @@ window.addEventListener('message', function(e) {
 	});
 });
 
-let attr = document.body.getAttribute('desu-image-search');
-attr = attr ? attr + ';' : '';
-document.body.setAttribute('desu-image-search', attr + 'ExHentai,');
+function doScript() {
+	if(!window.GM_openInTab) {
+		window.GM_openInTab = function(url) {
+			window.open(url, '_blank');
+		};
+	}
+	if(!window.GM_log) {
+		window.GM_log = function(msg) {
+			console.error(msg);
+		};
+	}
+	if(!window.GM_xmlhttpRequest) {
+		window.GM_xmlhttpRequest = function(obj) {
+			var h, xhr = new window.XMLHttpRequest();
+			if(obj['onreadystatechange']) {
+				xhr.onreadystatechange = function() {
+					obj['onreadystatechange'](xhr);
+				};
+			}
+			xhr.onload = function() {
+				if(obj['onload']) {
+					obj['onload'](xhr);
+				}
+				xhr = obj = null;
+			};
+			xhr.open(obj['method'], obj['url'], true);
+			if(obj['overrideMimeType']) {
+				xhr.overrideMimeType(obj['overrideMimeType']);
+			}
+			xhr.setRequestHeader('Accept-Encoding', 'deflate, gzip, x-gzip');
+			for(h in obj['headers']) {
+				xhr.setRequestHeader(h, obj['headers'][h]);
+			}
+			xhr.finalUrl = obj['url'];
+			xhr.send(null);
+		};
+	}
+	var attr = document.body.getAttribute('desu-image-search');
+	attr = attr ? attr + ';' : '';
+	document.body.setAttribute('desu-image-search', attr + 'ExHentai,');
 
-let style = document.createElement('style');
-style.type = 'text/css';
-style.innerHTML = '.DESU_srcExHentai:before { content: ""; padding: 0 16px 0 0; margin: 0 4px; background: url(data:image/gif;base64,R0lGODlhEAAQAHMAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQICgAAACwAAAAAEAAQAINmBhHi28oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAELjDISau9FWg9efCb9wESSGanaanjmr5cHMKkHJYnxYrdi7u/0aYXnBFbmKSyEgEAOw==) no-repeat center; }';
-document.head.appendChild(style);
+	var style = document.createElement('style');
+	style.type = 'text/css';
+	style.innerHTML = '.DESU_srcExHentai:before { content: ""; padding: 0 16px 0 0; margin: 0 4px; background: url(data:image/gif;base64,R0lGODlhEAAQAHMAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQICgAAACwAAAAAEAAQAINmBhHi28oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAELjDISau9FWg9efCb9wESSGanaanjmr5cHMKkHJYnxYrdi7u/0aYXnBFbmKSyEgEAOw==) no-repeat center; }';
+	document.head.appendChild(style);
+}
+
+if(window.opera) {
+	document.addEventListener('DOMContentLoaded', doScript, false);
+} else doScript();

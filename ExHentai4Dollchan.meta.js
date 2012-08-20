@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name			ExHentai4Dollchan
-// @version			1.1
+// @version			1.2
 // @namespace		https://github.com/Y0ba/ExHentai4Dollchan
 // @author			Y0ba
 // @description		Searches images on ExHentai (addon for Dollchan Extension Tools)
